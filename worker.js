@@ -69,7 +69,7 @@ addEventListener("fetch", (event) => {
   } else if (url.pathname === "/unRegisterWebhook") {
     event.respondWith(unRegisterWebhook(event));
   } else {
-    event.respondWith(new Response(null, { status: 404 }));
+    event.respondWith(new Response("Bot is running! ⚙️", { status: 200 }));
   }
 });
 
