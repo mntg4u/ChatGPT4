@@ -75,60 +75,54 @@ addEventListener("fetch", (event) => {
 
 // Made by https://t.me/Ashlynn_Repository
 async function handleWebhook(event) {
-  console.log("Incoming webhook request");  // Logs webhook access
+  console.log("Incoming webhook request");
+
   if (event.request.headers.get("X-Telegram-Bot-Api-Secret-Token") !== SECRET) {
+    console.error("Unauthorized access attempt detected");
     return new Response("Unauthorized", { status: 403 });
   }
-  const handler = async function () {
+
+  // Process the incoming update
+  try {
     const update = await event.request.json();
-    console.log("Update received:", update);  // Logs update data
+    console.log("Update received:", update);
     await onUpdate(update);
-  };
-  event.waitUntil(handler());
-  return new Response("Ok");
+    return new Response("Ok");
+  } catch (error) {
+    console.error("Error processing update:", error);
+    return new Response("Internal Server Error", { status: 500 });
+  }
 }
 
-// Made by https://t.me/Ashlynn_Repository
+/**
+ * Handle incoming text Message
+ */
 async function onUpdate(update) {
-  if ("message" in update) {
+  if (update.message && update.message.text) {
     const message = update.message;
+    const text = message.text.trim(); 
+    console.log("Handling message:", message);
 
-// Made by https://t.me/Ashlynn_Repository
-    if (!message.text) {
-      await sendMarkdown(message.chat.id, "Sorry, I can only process text messages. Please send text instead of media, stickers, or other message types.");
-      return;
-    }
-
-    await onMessage(message);
-  }
-}
-
-// Made by https://t.me/Ashlynn_Repository
-async function onMessage(message) {
-  // Check if the message is from the expected chat
-  if (CHAT_ID && message.chat.id !== CHAT_ID) return false;
-
-  const text = message.text.trim();
-
-  if (text === "/start") {
-    return sendStartMessage(message.chat.id);
-  } else if (text === "/about") {
-    return sendHelpMessage(message.chat.id);
-  } else if (text.startsWith("/img ")) {
-    const prompt = text.slice(6).trim(); 
-    return handleFluxCommand(message.chat.id, prompt);
-  } else {
-    await sendTyping(message.chat.id);
-    try {
-      const ai = new AIUncensored();
-      const aiResponse = await ai.fetchResponse(text); // Pass text to AI
-      return sendMarkdown(message.chat.id, aiResponse);
-    } catch (error) {
-      return sendMarkdown(message.chat.id, "Error fetching AI response: " + error.message);
+    if (text === "/start") {
+      return sendStartMessage(message.chat.id);
+    } else if (text === "/about") {
+      return sendHelpMessage(message.chat.id); 
+    } else if (text.startsWith("/img ")) {
+      const prompt = text.slice(5).trim();  
+      return handleFluxCommand(message.chat.id, prompt);
+    } else {
+      await sendTyping(message.chat.id);
+      try {
+        const ai = new AIUncensored();
+        const aiResponse = await ai.fetchResponse(text); 
+        return sendMarkdown(message.chat.id, aiResponse); 
+      } catch (error) {
+        console.error("Error fetching AI response:", error);
+        return sendMarkdown(message.chat.id, "Error fetching AI response: " + error.message);
+      }
     }
   }
 }
-
 
 async function handleFluxCommand(chatId, prompt) {
   await sendPhotoAction(chatId); // Show "sending photo" action
@@ -191,7 +185,7 @@ async function sendHelpMessage(chatId) {
 ║┣⪼❣️ᴜᴘᴅᴀᴛᴇ   : [Asʜʟʏɴɴ Rᴇᴘᴏsɪᴛᴏʀʏ 🔰](https://telegram.me/Ashlynn_Repository/215)
 ║┣⪼🗣️ʟᴀɴɢᴜᴀɢᴇ : [JS 💻](https://nodejs.org/en)
 ║┣⪼🧠ʜᴏsᴛᴇᴅ   : [ᴄʟᴏᴜᴅғʟᴀʀᴇ⚡](https://dash.cloudflare.com/)
-║┣⪼📚ᴜᴘᴅᴀᴛᴇᴅ  : 6-Nov-2024
+║┣⪼📚ᴜᴘᴅᴀᴛᴇᴅ  : 12-Nov-2024
 ║┣⪼🗒️ᴠᴇʀsɪᴏɴ  : v2.01.1
 ║╰━━━━━━━━━━━━━━━➣ 
 ╚══════════════════❍
@@ -251,16 +245,42 @@ async function sendMarkdown(chatId, text) {
 // Made by https://t.me/Ashlynn_Repository
 async function registerWebhook(event, requestUrl, suffix, secret) {
   const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
-  const r = await (
-    await fetch(apiUrl("setWebhook", { url: webhookUrl, secret_token: secret }))
-  ).json();
-  return new Response("ok" in r && r.ok ? "Ok" : JSON.stringify(r, null, 2));
+  console.log("Registering webhook at:", webhookUrl);
+
+  const response = await fetch(apiUrl("setWebhook"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url: webhookUrl, secret_token: secret })
+  });
+
+  const result = await response.json();
+  if (result.ok) {
+    console.log("Webhook registered successfully");
+    return new Response("Webhook registered successfully");
+  } else {
+    console.error("Error registering webhook:", result);
+    return new Response("Webhook registration failed", { status: 500 });
+  }
 }
+
 
 // Made by https://t.me/Ashlynn_Repository
 async function unRegisterWebhook(event) {
-  const r = await (await fetch(apiUrl("setWebhook", { url: "" }))).json();
-  return new Response("ok" in r && r.ok ? "Ok" : JSON.stringify(r, null, 2));
+  console.log("Unregistering webhook");
+  const response = await fetch(apiUrl("setWebhook"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url: "" })
+  });
+
+  const result = await response.json();
+  if (result.ok) {
+    console.log("Webhook unregistered successfully");
+    return new Response("Webhook unregistered successfully");
+  } else {
+    console.error("Error unregistering webhook:", result);
+    return new Response("Failed to unregister webhook", { status: 500 });
+  }
 }
 
 // Made by https://t.me/Ashlynn_Repository
