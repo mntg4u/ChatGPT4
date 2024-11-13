@@ -1,10 +1,9 @@
 // Made by https://t.me/Ashlynn_Repository
-
 const TOKEN = "";
 const CHAT_ID = null; 
 const WEBHOOK = "/endpoint";
 const SECRET = "";
-
+// Made by https://t.me/Ashlynn_Repository
 class AIUncensored {
   constructor() {
     this.url = "https://doanything.ai/api/chat";
@@ -19,7 +18,7 @@ class AIUncensored {
       "Accept-Language": "en-US,en;q=0.9"
     };
   }
-
+// Made by https://t.me/Ashlynn_Repository
   async fetchResponse(query) {
     const payload = {
       model: {
@@ -32,7 +31,7 @@ class AIUncensored {
       prompt: "You are a smart, responsive AI assistant, designed to deliver clear, relevant, and efficient responses to support users' needs across a range of tasks",
       temperature: 0.7
     };
-
+// Made by https://t.me/Ashlynn_Repository
     try {
       const response = await fetch(this.url, {
         method: 'POST',
@@ -43,7 +42,7 @@ class AIUncensored {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
+// Made by https://t.me/Ashlynn_Repository
       const responseText = await response.text();
       try {
         const jsonResponse = JSON.parse(responseText);
@@ -77,12 +76,12 @@ addEventListener("fetch", (event) => {
 async function handleWebhook(event) {
   console.log("Incoming webhook request");
 
+  // Check the authorization token
   if (event.request.headers.get("X-Telegram-Bot-Api-Secret-Token") !== SECRET) {
     console.error("Unauthorized access attempt detected");
     return new Response("Unauthorized", { status: 403 });
   }
-
-  // Process the incoming update
+// Made by https://t.me/Ashlynn_Repository
   try {
     const update = await event.request.json();
     console.log("Update received:", update);
@@ -94,9 +93,7 @@ async function handleWebhook(event) {
   }
 }
 
-/**
- * Handle incoming text Message
- */
+// Made by https://t.me/Ashlynn_Repository
 async function onUpdate(update) {
   if (update.message && update.message.text) {
     const message = update.message;
@@ -106,15 +103,15 @@ async function onUpdate(update) {
     if (text === "/start") {
       return sendStartMessage(message.chat.id);
     } else if (text === "/about") {
-      return sendHelpMessage(message.chat.id); 
+      return sendHelpMessage(message.chat.id);  
     } else if (text.startsWith("/img ")) {
       const prompt = text.slice(5).trim();  
       return handleFluxCommand(message.chat.id, prompt);
     } else {
-      await sendTyping(message.chat.id);
+      await sendTyping(message.chat.id);  
       try {
         const ai = new AIUncensored();
-        const aiResponse = await ai.fetchResponse(text); 
+        const aiResponse = await ai.fetchResponse(text);  
         return sendMarkdown(message.chat.id, aiResponse); 
       } catch (error) {
         console.error("Error fetching AI response:", error);
@@ -123,9 +120,9 @@ async function onUpdate(update) {
     }
   }
 }
-
+// Made by https://t.me/Ashlynn_Repository
 async function handleFluxCommand(chatId, prompt) {
-  await sendPhotoAction(chatId); // Show "sending photo" action
+  await sendPhotoAction(chatId); 
 
   try {
     const response = await fetch(`https://death-image.ashlynn.workers.dev/?prompt=${encodeURIComponent(prompt)}&image=6&dimensions=square&safety=false`);
@@ -135,7 +132,7 @@ async function handleFluxCommand(chatId, prompt) {
 
 // Made by https://t.me/Ashlynn_Repository
     const data = await response.json();
-    const imageUrls = data.images || [];  
+    const imageUrls = data.images || [];
     const joinText = data.join || "";    
 
 // Made by https://t.me/Ashlynn_Repository
@@ -174,7 +171,6 @@ async function sendStartMessage(chatId) {
       })  
     });
   }
-
 // Made by https://t.me/Ashlynn_Repository
 async function sendHelpMessage(chatId) {
     const helpMessage = `
@@ -185,7 +181,7 @@ async function sendHelpMessage(chatId) {
 ║┣⪼❣️ᴜᴘᴅᴀᴛᴇ   : [Asʜʟʏɴɴ Rᴇᴘᴏsɪᴛᴏʀʏ 🔰](https://telegram.me/Ashlynn_Repository/215)
 ║┣⪼🗣️ʟᴀɴɢᴜᴀɢᴇ : [JS 💻](https://nodejs.org/en)
 ║┣⪼🧠ʜᴏsᴛᴇᴅ   : [ᴄʟᴏᴜᴅғʟᴀʀᴇ⚡](https://dash.cloudflare.com/)
-║┣⪼📚ᴜᴘᴅᴀᴛᴇᴅ  : 12-Nov-2024
+║┣⪼📚ᴜᴘᴅᴀᴛᴇᴅ  : 13-Nov-2024
 ║┣⪼🗒️ᴠᴇʀsɪᴏɴ  : v2.01.1
 ║╰━━━━━━━━━━━━━━━➣ 
 ╚══════════════════❍
@@ -262,7 +258,6 @@ async function registerWebhook(event, requestUrl, suffix, secret) {
     return new Response("Webhook registration failed", { status: 500 });
   }
 }
-
 
 // Made by https://t.me/Ashlynn_Repository
 async function unRegisterWebhook(event) {
