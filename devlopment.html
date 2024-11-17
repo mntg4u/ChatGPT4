@@ -1,0 +1,718 @@
+<html><head><base href="https://itz-ashlynn.github.io/ChatGPT/" />
+<meta name="description" content="Comprehensive guide to deploy a ChatGPT bot on Cloudflare Workers. Step-by-step instructions for easy setup."> 
+<title>Cloudflare Workers ChatGPT Bot Codes</title>
+<link rel="icon" href="https://ar-hosting.pages.dev/1731870246454.jpg" type="image/png">
+<style>
+    body {
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #f5f7fa, #e4e8ec);
+        overflow-x: hidden;
+        color: #2c3e50;
+    }
+    
+    .code-block {
+        background: #1a1b26;
+        color: #a9b1d6;
+        padding: 20px;
+        border-radius: 12px;
+        overflow-x: auto;
+        margin: 15px 0;
+        position: relative;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .code-block:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .copy-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #7aa2f7;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        font-size: 0.9em;
+    }
+
+    .copy-button:hover {
+        background: #5d8af3;
+        transform: scale(1.05);
+    }
+
+    .copy-button.copied {
+        background: #9ece6a;
+    }
+
+    .note {
+        background: linear-gradient(to right, #ffffff, #f8f9fa);
+        padding: 20px;
+        border-left: 6px solid #7aa2f7;
+        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    h1, h2 {
+        color: #1a1b26;
+        position: relative;
+        padding-bottom: 10px;
+    }
+
+    h1::after, h2::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(to right, #7aa2f7, #9ece6a);
+        border-radius: 2px;
+    }
+
+    .tutorial-step {
+        background: linear-gradient(145deg, #ffffff, #f8f9fa);
+        padding: 30px;
+        border-radius: 16px;
+        margin: 30px 0;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    .tutorial-step:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+    }
+
+    .input-field {
+        position: relative;
+        margin: 20px 0;
+    }
+
+    .input-placeholder {
+        position: absolute;
+        pointer-events: none;
+        left: 12px;
+        top: 10px;
+        color: #a1a1aa;
+        font-size: 0.95em;
+        transition: all 0.2s ease;
+    }
+
+    code {
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 4px;
+        color: #2563eb;
+        font-size: 0.9em;
+    }
+
+    .note ul {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .note ul li {
+        margin: 10px 0;
+        padding-left: 24px;
+        position: relative;
+    }
+
+    .note ul li::before {
+        content: '→';
+        position: absolute;
+        left: 0;
+        color: #7aa2f7;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tutorial-step {
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+
+    #sidebar {
+        background-color: #202123;
+        border-right: 1px solid #4A4B53;
+        min-width: 260px;
+        max-width: 260px;
+    }
+
+    #chat-list {
+        background-color: #202123;
+        color: #ECECF1;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .send-button {
+        background-color: #2D2D2D;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .send-button:hover {
+        background-color: #4A4A4A;
+    }
+
+    .rename-chat {
+        margin-top: 10px;
+    }
+
+    .thinking-label {
+        color: #9B9B9B;
+        font-size: 12px;
+        padding: 5px;
+        background-color: #202123;
+        border-radius: 5px;
+    }
+
+    #chat-display {
+        background-color: #343541;
+        color: #ECECF1;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    
+    /* Updated styles for Claude-like design */
+    QMainWindow {
+        background-color: #343541;
+        color: #ECECF1;
+    }
+
+    #chat-display {
+        background-color: #343541;
+        color: #ECECF1;
+        border: none;
+        border-radius: 0;
+        padding: 20px;
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .input-field textarea {
+        background-color: #40414F;
+        color: #ECECF1;
+        border: 1px solid #565869;
+        border-radius: 6px;
+        padding: 12px;
+        font-size: 15px;
+        margin: 10px 60px;
+    }
+
+    /* Added toggle button styles */
+    .toggle-button {
+        background-color: transparent;
+        color: #ECECF1;
+        border: none;
+        font-size: 24px;
+        padding: 5px;
+        margin: 5px;
+    }
+
+    .toggle-button:hover {
+        background-color: #2A2B32;
+        border-radius: 4px;
+    }
+
+    /* Chat List styles */
+    #chat-list {
+        background-color: #202123;
+        color: #ECECF1;
+        border: none;
+        border-radius: 0px;
+        padding: 8px;
+    }
+
+    #chat-list::item {
+        padding: 12px;
+        margin: 2px 0;
+        border-radius: 6px;
+    }
+
+    #chat-list::item:selected {
+        background-color: #2A2B32;
+    }
+
+    #chat-list::item:hover {
+        background-color: #2A2B32;
+    }
+</style>
+<script>
+    function copyCode(button, codeId) {
+        const codeBlock = document.getElementById(codeId);
+        if (!codeBlock) return;
+        const text = codeBlock.textContent;
+        
+        navigator.clipboard.writeText(text).then(() => {
+            button.textContent = 'Copied!';
+            button.classList.add('copied');
+            
+            setTimeout(() => {
+                button.textContent = 'Copy';
+                button.classList.remove('copied');
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy:', err);
+            button.textContent = 'Failed to copy';
+        });
+    }
+
+    let thinkingInterval;
+    let startTime;
+
+    function updateThinkingTime() {
+        if (startTime) {
+            const seconds = (performance.now() - startTime) / 1000;
+            const label = document.querySelector('.thinking-label');
+            label.textContent = `Still thinking for ${seconds.toFixed(2)} seconds...`;
+        }
+    }
+
+    function startThinkingTimer() {
+        startTime = performance.now();
+        thinkingInterval = setInterval(updateThinkingTime, 100);
+    }
+
+    function stopThinkingTimer() {
+        if (thinkingInterval) {
+            clearInterval(thinkingInterval);
+            thinkingInterval = null;
+            const totalTime = (performance.now() - startTime) / 1000;
+            const label = document.querySelector('.thinking-label');
+            label.textContent = `Thought for ${totalTime.toFixed(2)} seconds`;
+        }
+    }
+
+    function addPlaceholderBehavior(input) {
+        input.addEventListener('focus', function() {
+            this.previousElementSibling.style.display = 'none';
+        });
+
+        input.addEventListener('blur', function() {
+            if (!this.value) {
+                this.previousElementSibling.style.display = 'block';
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const sendButton = document.querySelector('.send-button');
+        const reconnectButton = document.querySelector('.reconnect-button'); // Adjusted for reconnect button
+        if (sendButton) {
+            sendButton.addEventListener('click', function() {
+                startThinkingTimer();
+                setTimeout(function() {
+                    stopThinkingTimer();
+                }, 3000);
+            });
+        } else {
+            console.error('Send button not found!');
+        }
+
+        const inputField = document.querySelector('.input-field textarea');
+        if (inputField) {
+            addPlaceholderBehavior(inputField);
+        }
+
+        document.querySelector('.input-field textarea').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendButton.click();
+            }
+        });
+    });
+
+    // Add sidebar toggle method
+    function toggle_sidebar() {
+        const sidebar = document.getElementById('sidebar');
+        if (!sidebar) return;
+        
+        // Get current width
+        const currentWidth = sidebar.offsetWidth;
+        const newWidth = currentWidth > 0 ? '0px' : '260px';
+        
+        // Add transition CSS
+        sidebar.style.transition = 'width 0.2s ease-in-out';
+        sidebar.style.width = newWidth;
+        
+        // Clean up transition after animation
+        setTimeout(() => {
+            sidebar.style.transition = '';
+        }, 200);
+    }
+</script>
+</head>
+<body>
+
+<h1>Cloudflare Workers ChatGPT Bot Codes</h1>
+
+<div class="tutorial-step">
+    <h2>Step 1: Prerequisites</h2>
+    <p>A Telegram bot token from @BotFather</p>
+    <p>A Cloudflare account with Workers enabled</p>
+    <p>A Working Mind</p>
+    <div class="code-block">
+        <button class="copy-button" onclick="copyCode(this, 'code1')">Copy</button>
+        <pre id="code1">https://github.com/Itz-Ashlynn/ChatGPT</pre>
+    </div>
+</div>
+
+<div class="tutorial-step">
+    <h2>Step 2: Cloudflare Workers Deployment</h2>
+    <ol>
+        <li><strong>Prerequisites:</strong></li>
+        <ul>
+            <li>Telegram bot token from @BotFather</li>
+            <li>Cloudflare account with Workers enabled</li>
+        </ul>
+        <li>Go to the Cloudflare dashboard and navigate to Workers.</li>
+        <li>Create a new Worker and copy the code from <code>worker.js</code>.</li>
+        <li>Paste the code into the Worker editor.</li>
+        <li>Set the following variables in the code:
+            <ul>
+                <li><code>TOKEN</code>: Your bot token</li>
+                <li><code>CHAT_ID</code>: Your chat ID (or <code>null</code> for no chat verification)</li>
+                <li><code>SECRET</code>: A secure, unique string for webhook protection (eg. <code>AAGO80B08kluFGUcr1vOHQZLyYnvbinfo</code>)</li>
+            </ul>
+        </li>
+        <li>Save and deploy the Worker. Cloudflare will assign a URL to your Worker.</li>
+    </ol>
+</div>
+
+<div class="tutorial-step">
+    <h2>Step 3: Webhook Management</h2>
+    <p>Manage your Telegram bot webhooks using the following endpoints:</p>
+    <ul>
+        <li><code>/registerWebhook</code>: Registers the bot's webhook with Telegram.</li>
+        <li><code>/unRegisterWebhook</code>: Unregisters the bot's webhook.</li>
+    </ul>
+    <p>Access these endpoints via the Cloudflare Worker URL assigned during deployment.</p>
+</div>
+
+<div class="tutorial-step">
+    <h2>CODES</h2>
+    <p><code>worker.js</code></p>
+
+    <div class="code-block">
+        <button class="copy-button" onclick="copyCode(this, 'code2')">Copy</button>
+        <pre id="code2">
+            // Made by https://t.me/Ashlynn_Repository
+            const TOKEN = "";
+            const CHAT_ID = null; 
+            const WEBHOOK = "/endpoint";
+            const SECRET = "";
+            // Made by https://t.me/Ashlynn_Repository
+            class AIUncensored {
+              constructor() {
+                this.url = "https://doanything.ai/api/chat";
+                this.headers = {
+                  "Content-Type": "application/json",
+                  "Accept": "*/*",
+                  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+                  "Origin": "https://doanything.ai",
+                  "Sec-Fetch-Site": "same-origin",
+                  "Sec-Fetch-Mode": "cors",
+                  "Sec-Fetch-Dest": "empty",
+                  "Accept-Language": "en-US,en;q=0.9"
+                };
+              }
+            // Made by https://t.me/Ashlynn_Repository
+              async fetchResponse(query) {
+                const payload = {
+                  model: {
+                    id: "gpt-3.5-turbo-0613",
+                    name: "GPT-3.5",
+                    maxLength: 12000,
+                    tokenLimit: 4000 
+                  },
+                  messages: [{ role: "user", content: query, pluginId: null }],
+                  prompt: "You are a smart, responsive AI assistant, designed to deliver clear, relevant, and efficient responses to support users' needs across a range of tasks",
+                  temperature: 0.7
+                };
+            // Made by https://t.me/Ashlynn_Repository
+                try {
+                  const response = await fetch(this.url, {
+                    method: 'POST',
+                    headers: this.headers,
+                    body: JSON.stringify(payload)
+                  });
+            
+                  if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                  }
+            // Made by https://t.me/Ashlynn_Repository
+                  const responseText = await response.text();
+                  try {
+                    const jsonResponse = JSON.parse(responseText);
+                    return jsonResponse.text || "Received response but no message returned";
+                  } catch {
+                    return responseText;
+                  }
+            
+                } catch (error) {
+                  console.error('Error fetching AI response:', error);
+                  return "Error fetching AI response: " + error.message;
+                }
+              }
+            }
+            
+            // Made by https://t.me/Ashlynn_Repository
+            addEventListener("fetch", (event) => {
+              const url = new URL(event.request.url);
+              if (url.pathname === WEBHOOK) {
+                event.respondWith(handleWebhook(event));
+              } else if (url.pathname === "/registerWebhook") {
+                event.respondWith(registerWebhook(event, url, WEBHOOK, SECRET));
+              } else if (url.pathname === "/unRegisterWebhook") {
+                event.respondWith(unRegisterWebhook(event));
+              } else {
+                event.respondWith(new Response("Bot is running! ⚙️", { status: 200 }));
+              }
+            });
+            
+            // Made by https://t.me/Ashlynn_Repository
+            async function handleWebhook(event) {
+              console.log("Incoming webhook request");
+            
+              // Check the authorization token
+              if (event.request.headers.get("X-Telegram-Bot-Api-Secret-Token") !== SECRET) {
+                console.error("Unauthorized access attempt detected");
+                return new Response("Unauthorized", { status: 403 });
+              }
+            // Made by https://t.me/Ashlynn_Repository
+              try {
+                const update = await event.request.json();
+                console.log("Update received:", update);
+                await onUpdate(update);
+                return new Response("Ok");
+              } catch (error) {
+                console.error("Error processing update:", error);
+                return new Response("Internal Server Error", { status: 500 });
+              }
+            }
+            
+            // Made by https://t.me/Ashlynn_Repository
+            async function onUpdate(update) {
+              if (update.message && update.message.text) {
+                const message = update.message;
+                const text = message.text.trim(); 
+                console.log("Handling message:", message);
+            
+                if (text === "/start") {
+                  return sendStartMessage(message.chat.id);
+                } else if (text === "/about") {
+                  return sendHelpMessage(message.chat.id);  
+                } else if (text.startsWith("/img ")) {
+                  const prompt = text.slice(5).trim();  
+                  return handleFluxCommand(message.chat.id, prompt);
+                } else {
+                  await sendTyping(message.chat.id);  
+                  try {
+                    const ai = new AIUncensored();
+                    const aiResponse = await ai.fetchResponse(text);  
+                    return sendMarkdown(message.chat.id, aiResponse); 
+                  } catch (error) {
+                    console.error("Error fetching AI response:", error);
+                    return sendMarkdown(message.chat.id, "Error fetching AI response: " + error.message);
+                  }
+                }
+              }
+            }
+            // Made by https://t.me/Ashlynn_Repository
+            async function handleFluxCommand(chatId, prompt) {
+              await sendPhotoAction(chatId); 
+            
+              try {
+                const response = await fetch(`https://death-image.ashlynn.workers.dev/?prompt=${encodeURIComponent(prompt)}&image=6&dimensions=square&safety=false`);
+                if (!response.ok) {
+                  throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+            
+            // Made by https://t.me/Ashlynn_Repository
+                const data = await response.json();
+                const imageUrls = data.images || [];
+                const joinText = data.join || "";    
+            
+            // Made by https://t.me/Ashlynn_Repository
+                if (imageUrls.length === 0) {
+                  throw new Error("No images returned from API.");
+                }
+            
+            // Made by https://t.me/Ashlynn_Repository
+                for (const imageUrl of imageUrls) {
+                  await sendPhoto(chatId, imageUrl);
+                }
+            
+                if (joinText) {
+                  await sendMarkdown(chatId, joinText);
+                }
+            
+              } catch (error) {
+                console.error("Error generating images:", error);
+                await sendMarkdown(chatId, "Error generating images: " + error.message);
+              }
+            }
+            
+            // Made by https://t.me/Ashlynn_Repository
+            async function sendStartMessage(chatId) {
+                const videoUrl = "https://file-stream.darkhacker7301.workers.dev/?file=MzA2OTMxOTgxMzI2MzkwOTAwLzEwNDczMTM0NA"; // Replace with actual video URL
+                const caption = "→ I ᴀᴍ CʜᴀᴛGPT X, I'm Devloped to answer your Question Made by @Itz_Ashlynn In India 🇮🇳\n\n🌎Wʜᴀᴛ ɪs Nᴇᴡ?\n→ Hᴀᴠᴇ ᴀ ғʀᴇᴇ ᴄʜᴀᴛ ɢᴘᴛ ʙᴏᴛ  sᴇʀᴠɪᴄᴇ ᴀᴛ ᴛʜᴇ ᴍᴏᴍᴇɴᴛ sᴏ ʏᴏᴜ ᴄᴀɴ ᴀsᴋ ᴀɴʏ ǫᴜᴇsᴛɪᴏɴs ʏᴏᴜ ᴡᴀɴᴛ.";
+              
+                await fetch(apiUrl("sendVideo"), {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    chat_id: chatId,
+                    video: videoUrl,
+                    caption: caption,
+                    parse_mode: "HTML"
+                  })  
+                });
+              }
+            // Made by https://t.me/Ashlynn_Repository
+            async function sendHelpMessage(chatId) {
+                const helpMessage = `
+            ╔════❰ Cʜᴀᴛɢᴘᴛ X ❱═❍
+            ║╭━━━━━━━━━━━━━━━➣
+            ║┣⪼🤖ᴍʏ ɴᴀᴍᴇ  : Cʜᴀᴛɢᴘᴛ X
+            ║┣⪼👦ᴅᴇᴠᴇʟᴏᴘᴇʀ: [Asʜʟʏɴɴ ⚡](https://telegram.me/Itz_Ashlynn)
+            ║┣⪼❣️ᴜᴘᴅᴀᴛᴇ   : [Asʜʟʏɴɴ Rᴇᴘᴏsɪᴛᴏʀʏ 🔰](https://telegram.me/Ashlynn_Repository/215)
+            ║┣⪼🗣️ʟᴀɴɢᴜᴀɢᴇ : [JS 💻](https://nodejs.org/en)
+            ║┣⪼🧠ʜᴏsᴛᴇᴅ   : [ᴄʟᴏᴜᴅғʟᴀʀᴇ⚡](https://dash.cloudflare.com/)
+            ║┣⪼📚ᴜᴘᴅᴀᴛᴇᴅ  : 13-Nov-2024
+            ║┣⪼🗒️ᴠᴇʀsɪᴏɴ  : v2.01.1
+            ║╰━━━━━━━━━━━━━━━➣ 
+            ╚══════════════════❍
+                `;
+            
+              await sendMarkdown(chatId, helpMessage);
+            }
+            
+            async function sendTyping(chatId) {
+                return (
+                  await fetch(
+                    apiUrl("sendChatAction", {
+                      chat_id: chatId,
+                      action: "typing",
+                    })
+                  )
+                ).json();
+              }
+            
+            // Made by https://t.me/Ashlynn_Repository
+            async function sendPhotoAction(chatId) {
+              await fetch(apiUrl("sendChatAction", {
+                chat_id: chatId,
+                action: "upload_photo"
+              }));
+            }
+            
+            // Made by https://t.me/Ashlynn_Repository
+            async function sendPhoto(chatId, photoUrl, caption) {
+              await fetch(apiUrl("sendPhoto"), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  chat_id: chatId,
+                  photo: photoUrl,
+                  caption: caption,
+                  parse_mode: "Markdown",
+                  message_effect_id: "5104841245755180586"
+                })
+              });
+            }
+            
+            // Made by https://t.me/Ashlynn_Repository
+            async function sendMarkdown(chatId, text) {
+              return (
+                await fetch(
+                  apiUrl("sendMessage", {
+                    chat_id: chatId,
+                    text,
+                    parse_mode: "markdown",
+                    message_effect_id: "5104841245755180586"
+                  })
+                )
+              ).json();
+            }
+            
+            // Made by https://t.me/Ashlynn_Repository
+            async function registerWebhook(event, requestUrl, suffix, secret) {
+              const webhookUrl = `${requestUrl.protocol}//${requestUrl.hostname}${suffix}`;
+              console.log("Registering webhook at:", webhookUrl);
+            
+              const response = await fetch(apiUrl("setWebhook"), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: webhookUrl, secret_token: secret })
+              });
+            
+              const result = await response.json();
+              if (result.ok) {
+                console.log("Webhook registered successfully");
+                return new Response("Webhook registered successfully");
+              } else {
+                console.error("Error registering webhook:", result);
+                return new Response("Webhook registration failed", { status: 500 });
+              }
+            }
+            
+            // Made by https://t.me/Ashlynn_Repository
+            async function unRegisterWebhook(event) {
+              console.log("Unregistering webhook");
+              const response = await fetch(apiUrl("setWebhook"), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: "" })
+              });
+            
+              const result = await response.json();
+              if (result.ok) {
+                console.log("Webhook unregistered successfully");
+                return new Response("Webhook unregistered successfully");
+              } else {
+                console.error("Error unregistering webhook:", result);
+                return new Response("Failed to unregister webhook", { status: 500 });
+              }
+            }
+            
+            // Made by https://t.me/Ashlynn_Repository
+            function apiUrl(methodName, params = null) {
+              let query = "";
+              if (params) {
+                query = "?" + new URLSearchParams(params).toString();
+              }
+              return `https://api.telegram.org/bot${TOKEN}/${methodName}${query}`;
+            }
+</pre>
+    </div>
+</div>
+
+</body>
+</html>
