@@ -6,54 +6,36 @@ const SECRET = "";
 // Made by https://t.me/Ashlynn_Repository
 class AIUncensored {
   constructor() {
-    this.url = "https://doanything.ai/api/chat";
+    this.url = "https://backend.buildpicoapps.com/aero/run/llm-api?pk=v1-Z0FBQUFBQm5IZkJDMlNyYUVUTjIyZVN3UWFNX3BFTU85SWpCM2NUMUk3T2dxejhLSzBhNWNMMXNzZlp3c09BSTR6YW1Sc1BmdGNTVk1GY0liT1RoWDZZX1lNZlZ0Z1dqd3c9PQ=="; // New API endpoint
     this.headers = {
-      "Content-Type": "application/json",
-      "Accept": "*/*",
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
-      "Origin": "https://doanything.ai",
-      "Sec-Fetch-Site": "same-origin",
-      "Sec-Fetch-Mode": "cors",
-      "Sec-Fetch-Dest": "empty",
-      "Accept-Language": "en-US,en;q=0.9"
+      "Content-Type": "application/json"
     };
   }
-// Made by https://t.me/Ashlynn_Repository
-  async fetchResponse(query) {
-    const payload = {
-      model: {
-        id: "gpt-3.5-turbo-0613",
-        name: "GPT-3.5",
-        maxLength: 12000,
-        tokenLimit: 4000 
-      },
-      messages: [{ role: "user", content: query, pluginId: null }],
-      prompt: "You are a smart, responsive AI assistant, designed to deliver clear, relevant, and efficient responses to support users' needs across a range of tasks",
-      temperature: 0.7
-    };
-// Made by https://t.me/Ashlynn_Repository
+
+  async fetchResponse(userMessage) {
     try {
       const response = await fetch(this.url, {
-        method: 'POST',
+        method: "POST",
         headers: this.headers,
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ prompt: userMessage })
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-// Made by https://t.me/Ashlynn_Repository
-      const responseText = await response.text();
-      try {
-        const jsonResponse = JSON.parse(responseText);
-        return jsonResponse.text || "Received response but no message returned";
-      } catch {
-        return responseText;
+        console.error("Error:", response.statusText);
+        return "There was an error. Please try again later.";
       }
 
+      const data = await response.json();
+
+      if (data.status === "success") {
+        return data.text;
+      } else {
+        console.error("Error:", data);
+        return "There was an error. Please try again later.";
+      }
     } catch (error) {
-      console.error('Error fetching AI response:', error);
-      return "Error fetching AI response: " + error.message;
+      console.error("Error:", error);
+      return "There was an error. Please try again later.";
     }
   }
 }
