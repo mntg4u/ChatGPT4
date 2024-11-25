@@ -1,4 +1,4 @@
-
+// Made by https://t.me/Ashlynn_Repository
 const TOKEN = "";
 const CHAT_ID = null; 
 const WEBHOOK = "/endpoint";
