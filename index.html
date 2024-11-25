@@ -8,20 +8,20 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap">
   <style>
     :root {
-      --gemini-blue: #8ab4f8;
-      --gemini-purple: #c58af9;
-      --gemini-green: #81c995;
-      --gemini-yellow: #fdd663;
-      --gemini-background: #202124;
-      --gemini-text: #e8eaed;
-      --gemini-user-bubble: rgba(60, 64, 67, 0.9);
-      --gemini-ai-bubble: rgba(48, 49, 52, 0.9);
+      --gemini-blue: #36d1dc;
+      --gemini-purple: #5b86e5;
+      --gemini-green: #00c9a7;
+      --gemini-yellow: #f3ea5f;
+      --gemini-pink: #ff6a88;
+      --gemini-background: #1e1e2a;
+      --gemini-text: #f1f1f2;
+      --bubble-gradient: linear-gradient(135deg, var(--gemini-purple), var(--gemini-pink));
       --glass-effect: rgba(255, 255, 255, 0.1);
     }
-    
+
     body {
       font-family: 'Google Sans', sans-serif;
-      background: linear-gradient(135deg, #1f1f1f, #27272a);
+      background: linear-gradient(135deg, #1f1f1f, #3d3d50);
       color: var(--gemini-text);
       display: flex;
       justify-content: center;
@@ -29,6 +29,7 @@
       min-height: 100vh;
       margin: 0;
       padding: 0;
+      overflow: hidden;
     }
 
     .container {
@@ -43,19 +44,20 @@
       height: 80vh;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
     h1 {
       font-size: 2.5em;
       text-align: center;
-      background: linear-gradient(90deg, var(--gemini-blue), var(--gemini-purple), var(--gemini-green), var(--gemini-yellow));
+      background: linear-gradient(270deg, var(--gemini-blue), var(--gemini-green), var(--gemini-yellow), var(--gemini-pink));
       -webkit-background-clip: text;
       color: transparent;
       font-weight: 700;
-      animation: gradient-animation 3s ease-in-out infinite;
+      animation: gradient-flow 6s infinite linear;
     }
 
-    @keyframes gradient-animation {
+    @keyframes gradient-flow {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
@@ -75,28 +77,36 @@
       max-width: 80%;
       padding: 15px;
       border-radius: 18px;
-      line-height: 1.5;
       position: relative;
       word-wrap: break-word;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
 
     .user-message {
       align-self: flex-end;
-      background: var(--gemini-user-bubble);
+      background: var(--bubble-gradient);
+      background-size: 400% 400%;
+      animation: gradient-move 4s infinite alternate;
+      color: #fff;
     }
 
     .ai-message {
       align-self: flex-start;
-      background: var(--gemini-ai-bubble);
+      background: linear-gradient(135deg, var(--gemini-green), var(--gemini-blue));
+      background-size: 400% 400%;
+      animation: gradient-move 6s infinite alternate-reverse;
+      color: #fff;
     }
 
-    .timestamp {
-      font-size: 0.75em;
-      color: rgba(255, 255, 255, 0.6);
-      position: absolute;
-      bottom: -18px;
-      right: 10px;
+    @keyframes gradient-move {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
     }
 
     #inputContainer {
@@ -113,10 +123,11 @@
       background: rgba(255, 255, 255, 0.1);
       color: var(--gemini-text);
       font-size: 1em;
+      animation: bounceIn 0.5s ease;
     }
 
     #sendBtn {
-      background: linear-gradient(45deg, var(--gemini-blue), var(--gemini-purple));
+      background: linear-gradient(135deg, var(--gemini-purple), var(--gemini-pink));
       color: var(--gemini-background);
       border: none;
       padding: 12px 24px;
@@ -127,18 +138,38 @@
     }
 
     #sendBtn:hover {
-      transform: scale(1.05);
+      transform: scale(1.1);
       opacity: 0.9;
+      animation: buttonHover 0.3s ease;
     }
 
-    @media (max-width: 600px) {
-      .container {
-        height: 90vh;
-      }
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px;
+    }
 
-      h1 {
-        font-size: 2em;
-      }
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--gemini-text);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.3s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.6s;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.5); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.8; }
     }
   </style>
 </head>
@@ -160,9 +191,8 @@
 
     function addMessage(content, isUser) {
       const messageDiv = document.createElement('div');
-      const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
-      messageDiv.innerHTML = `${content}<span class="timestamp">${timestamp}</span>`;
+      messageDiv.textContent = content;
       chatContainer.appendChild(messageDiv);
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
@@ -188,8 +218,10 @@
     }
 
     sendBtn.addEventListener('click', handleUserInput);
-    userInput.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') handleUserInput();
+    userInput.addEventListener('keyup', (event) => {
+      if (event.key === 'Enter') {
+        handleUserInput();
+      }
     });
   </script>
 </body>
