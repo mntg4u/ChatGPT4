@@ -1,5 +1,5 @@
 
-const TOKEN = "7383174818:AAE41Aeg9P2HSA7MvI7YEgWhxl-1wqoXSNU";
+const TOKEN = "";
 const CHAT_ID = null; 
 const WEBHOOK = "/endpoint";
 const SECRET = "AAEDaYHghSqCqrmOfyZERyN5_hkGjn8MWH8";
